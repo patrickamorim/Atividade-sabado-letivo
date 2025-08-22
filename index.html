@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Caia Fora, Menina!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #8B5FBF 0%, #6B46C1 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="white" opacity="0.1"/><circle cx="20" cy="20" r="1" fill="white" opacity="0.15"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.1"/></svg>');
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bar {
+            background: #f0f0f0;
+            height: 8px;
+            margin: 20px 30px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress {
+            background: linear-gradient(90deg, #8B5FBF, #6B46C1);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-content {
+            padding: 40px;
+        }
+
+        .question-card {
+            background: #f8f9ff;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .question-card.active {
+            border-color: #8B5FBF;
+            box-shadow: 0 10px 25px rgba(139, 95, 191, 0.15);
+        }
+
+        .question {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+        }
+
+        .option:hover {
+            border-color: #8B5FBF;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 95, 191, 0.2);
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border-color: #059669;
+        }
+
+        .option.incorrect {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            display: none;
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            border-left: 5px solid #10b981;
+            color: #064e3b;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+            border-left: 5px solid #ef4444;
+            color: #7f1d1d;
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #8B5FBF, #6B46C1);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 95, 191, 0.3);
+        }
+
+        .results {
+            text-align: center;
+            padding: 40px;
+            display: none;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            color: white;
+        }
+
+        .score-excellent {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .score-good {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .score-needs-improvement {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .results h2 {
+            font-size: 2.2em;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .results p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        .restart-btn {
+            background: linear-gradient(135deg, #8B5FBF, #6B46C1);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 95, 191, 0.3);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 0.6s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 Caia Fora, Menina! 🌸</h1>
+            <p>Quiz sobre identificação de sinais de violência e empoderamento feminino</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+
+        <div class="quiz-content" id="quiz-content">
+            <!-- Questões serão inseridas aqui pelo JavaScript -->
+        </div>
+
+        <div class="results" id="results">
+            <div class="score-circle" id="score-circle">
+                <span id="score-text">0%</span>
+            </div>
+            <h2 id="result-title">Resultado</h2>
+            <p id="result-message">Mensagem do resultado</p>
+            <button class="restart-btn" onclick="restartQuiz()">🔄 Refazer Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "Ana sempre se sente culpada pelas brigas com Carlos, mesmo quando ele começa. Isso é normal em um relacionamento?",
+                options: [
+                    "Sim, é normal se sentir culpada às vezes",
+                    "Não, isso indica manipulação psicológica",
+                    "Depende da situação específica",
+                    "É normal apenas no início do relacionamento"
+                ],
+                correct: 1,
+                explanation: "❌ Não, isso NÃO é normal! Quando uma pessoa sempre se sente culpada pelas brigas, mesmo não sendo a causadora, isso indica manipulação psicológica. O parceiro abusivo faz a vítima acreditar que ela é sempre a culpada, minando sua autoestima e autoconfiança."
+            },
+            {
+                question: "João controla o celular de Maria e exige que ela o entregue sempre que ele pedir. Isso é um sinal de abuso?",
+                options: [
+                    "Não, é apenas ciúme normal",
+                    "Sim, é controle e violação da privacidade",
+                    "Só é abuso se ele ler as mensagens",
+                    "É normal entre casais"
+                ],
+                correct: 1,
+                explanation: "✅ SIM, isso é abuso! Controlar o celular do parceiro é uma forma de violência psicológica que viola a privacidade e autonomia. Relacionamentos saudáveis são baseados em confiança, não em controle. No Violentômetro, isso se enquadra na fase de 'controlar/proibir'."
+            },
+            {
+                question: "Pedro isola Bruna de seus amigos e familiares, dizendo que eles não a querem bem. Qual o impacto desse comportamento?",
+                options: [
+                    "Fortalece o relacionamento do casal",
+                    "Diminui a autoestima e cria dependência emocional",
+                    "É uma demonstração de amor e cuidado",
+                    "Não tem impacto significativo"
+                ],
+                correct: 1,
+                explanation: "💔 O isolamento é uma tática de controle muito perigosa! Ao separar Bruna de sua rede de apoio, Pedro está criando dependência emocional e diminuindo sua autoestima. Isso torna mais difícil para ela buscar ajuda ou sair do relacionamento abusivo."
+            },
+            {
+                question: "Ana se sente pressionada a ter relações sexuais com Carlos, mesmo quando não está a fim. Isso é abuso?",
+                options: [
+                    "Não, são namorados/casados",
+                    "Sim, é violência sexual",
+                    "Só é abuso se houver força física",
+                    "É normal em relacionamentos longos"
+                ],
+                correct: 1,
+                explanation: "🚨 SIM, isso é violência sexual! Consentimento deve ser livre e voluntário sempre, independentemente do status do relacionamento. Pressionar alguém para ter relações sexuais, mesmo sendo parceiro, é uma forma de abuso que viola a autonomia corporal da pessoa."
+            },
+            {
+                question: "Bruna está com medo de deixar Pedro, pois ele a ameaça de destruir sua vida. Qual fase do Violentômetro isso representa?",
+                options: [
+                    "Fase amarela (cuidado)",
+                    "Fase laranja (alerta)",
+                    "Fase vermelha (perigo)",
+                    "Fase inicial do relacionamento"
+                ],
+                correct: 2,
+                explanation: "🚨 FASE VERMELHA - PERIGO! Ameaças de destruir a vida da pessoa são sinais de violência grave. Esta fase requer ação imediata: buscar ajuda profissional, elaborar um plano de segurança e considerar medidas protetivas. A vida da Bruna pode estar em risco real."
+            },
+            {
+                question: "Carlos fica bravo quando Ana sai com suas amigas sem ele. Isso é um comportamento abusivo?",
+                options: [
+                    "Não, é ciúme normal",
+                    "Sim, é controle e possessividade",
+                    "Só é abuso se ele proibir",
+                    "Depende de quanto tempo ficam juntas"
+                ],
+                correct: 1,
+                explanation: "⚠️ SIM, é comportamento abusivo! Ficar bravo quando o parceiro sai com amigos é sinal de possessividade e controle. Relacionamentos saudáveis respeitam a independência e os vínculos sociais de cada pessoa. Isso pode ser o início de um padrão de isolamento."
+            },
+            {
+                question: "Luís sempre menospreza as opiniões de Paula e a faz se sentir inferior. Isso é uma forma de violência psicológica?",
+                options: [
+                    "Não, é apenas uma diferença de opinião",
+                    "Sim, é violência psicológica",
+                    "Só é violência se houver xingamentos",
+                    "É normal em discussões"
+                ],
+                correct: 1,
+                explanation: "💜 SIM, é violência psicológica! Menosprezar constantemente as opiniões de alguém e fazê-la se sentir inferior são formas de abuso emocional. Isso destrói a autoestima e pode causar danos psicológicos profundos. Todos merecem respeito e consideração em um relacionamento."
+            },
+            {
+                question: "Luís ameaça matar Paula se ela o deixar. Qual é a fase do Violentômetro e quais medidas devem ser tomadas?",
+                options: [
+                    "Fase laranja - conversar com ele",
+                    "Fase vermelha - buscar ajuda imediatamente",
+                    "Fase amarela - dar um tempo",
+                    "Não é grave, são só palavras"
+                ],
+                correct: 1,
+                explanation: "🆘 FASE VERMELHA - EMERGÊNCIA! Ameaças de morte devem ser levadas a sério SEMPRE. Paula precisa: buscar ajuda imediatamente (190, 180), elaborar um plano de segurança, procurar uma delegacia da mulher, e considerar medidas protetivas. Sua vida está em perigo real!"
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            const progressPercent = ((currentQuestion + 1) / questions.length) * 100;
+            
+            document.getElementById('progress').style.width = progressPercent + '%';
+            
+            const quizContent = document.getElementById('quiz-content');
+            quizContent.innerHTML = `
+                <div class="question-card active">
+                    <div class="question">
+                        Questão ${currentQuestion + 1} de ${questions.length}:<br>
+                        ${question.question}
+                    </div>
+                    <div class="options">
+                        ${question.options.map((option, index) => 
+                            `<div class="option" onclick="selectOption(${index})">${option}</div>`
+                        ).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Próxima Questão</button>
+                </div>
+            `;
+            answered = false;
+        }
+
+        function selectOption(selectedIndex) {
+            if (answered) return;
+            
+            answered = true;
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('next-btn');
+            
+            options.forEach((option, index) => {
+                option.classList.add('disabled');
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            if (selectedIndex === question.correct) {
+                score++;
+                feedback.className = 'feedback correct';
+                feedback.innerHTML = `
+                    <strong>✅ Resposta Correta!</strong><br><br>
+                    ${question.explanation}
+                `;
+                feedback.classList.add('pulse');
+            } else {
+                feedback.className = 'feedback incorrect';
+                feedback.innerHTML = `
+                    <strong>❌ Resposta Incorreta!</strong><br><br>
+                    <strong>Resposta correta:</strong> ${question.options[question.correct]}<br><br>
+                    ${question.explanation}
+                `;
+                feedback.classList.add('pulse');
+            }
+            
+            feedback.style.display = 'block';
+            
+            if (currentQuestion === questions.length - 1) {
+                nextBtn.textContent = 'Ver Resultado';
+            }
+            nextBtn.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            const percentage = Math.round((score / questions.length) * 100);
+            const quizContent = document.getElementById('quiz-content');
+            const results = document.getElementById('results');
+            const scoreCircle = document.getElementById('score-circle');
+            const scoreText = document.getElementById('score-text');
+            const resultTitle = document.getElementById('result-title');
+            const resultMessage = document.getElementById('result-message');
+            
+            quizContent.style.display = 'none';
+            results.style.display = 'block';
+            
+            scoreText.textContent = percentage + '%';
+            
+            if (percentage >= 80) {
+                scoreCircle.className = 'score-circle score-excellent';
+                resultTitle.textContent = '🌟 Excelente!';
+                resultMessage.textContent = 'Parabéns! Você demonstrou uma excelente compreensão sobre os sinais de violência e empoderamento feminino. Continue espalhando esse conhecimento e ajudando outras mulheres!';
+            } else if (percentage >= 60) {
+                scoreCircle.className = 'score-circle score-good';
+                resultTitle.textContent = '👍 Bom trabalho!';
+                resultMessage.textContent = 'Você tem um bom entendimento sobre o tema, mas ainda há espaço para aprender mais. Continue estudando sobre violência doméstica e formas de prevenção.';
+            } else {
+                scoreCircle.className = 'score-circle score-needs-improvement';
+                resultTitle.textContent = '📚 Continue aprendendo!';
+                resultMessage.textContent = 'É importante continuar se educando sobre este tema vital. Busque mais informações sobre sinais de violência e recursos de apoio. Conhecimento pode salvar vidas!';
+            }
+            
+            document.getElementById('progress').style.width = '100%';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+            document.getElementById('quiz-content').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            loadQuestion();
+        }
+
+        // Inicializar o quiz
+        loadQuestion();
+    </script>
+</body>
+</html>
